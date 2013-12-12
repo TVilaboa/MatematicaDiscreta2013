@@ -1,10 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,10 +26,11 @@ public class GrafoApiFinal {
         }
         List<Integer> visitados = new ArrayList<Integer>();
         visitados.add(v);
-        for (int i = 0; i < modif.length; i++) {
+        for (int i = 0; i < modif.length - 1; i++) {
             int menor = calcularMenor(caminos, visitados);
             visitados.add(menor);
             for (int j = 0; j < modif.length; j++) {
+                System.out.println(g.arista(menor, j));
                 if (!visitados.contains(j) && caminos[j] > (caminos[menor] + g.arista(menor, j))) {
                     caminos[j] = caminos[menor] + g.arista(menor, j);
                     modif[j] = menor;
@@ -40,6 +38,7 @@ public class GrafoApiFinal {
 
             }
         }
+        System.out.println(Arrays.toString(caminos));
         for (int i = 0; i < modif.length; i++) {
             System.out.println("<" + buscarCamino(modif, v, i) + ">");
         }
@@ -52,10 +51,10 @@ public class GrafoApiFinal {
     }
 
     private int calcularMenor(int[] array, List<Integer> visitados) {
-        int resultado = 2147483647;
+        int resultado = 2147483640;
         for (int i = 0; i < array.length; i++) {
-            if (array[i] < resultado && !visitados.contains(array[i])) {
-                resultado = array[i];
+            if (array[i] < resultado && !visitados.contains(i)) {
+                resultado = i;
             }
         }
         return resultado;

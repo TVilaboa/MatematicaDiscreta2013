@@ -12,7 +12,7 @@ import java.util.List;
 
 public abstract class Grafo implements Grafeable {
 
-    protected final int infinito = 2147483647;
+    protected final int infinito = 2147483640;
 
     protected Object[] V;
 
@@ -90,14 +90,14 @@ public abstract class Grafo implements Grafeable {
         V[n] = x;
 
         n++;
-        for (int i = 0; i < n - 1; i++) {
-            A[n - 1][i] = infinito;
-            A[i][n - 1] = infinito;
+        for (int i = 0; i <= n; i++) {
+            A[n][i] = infinito;
+            A[i][n] = infinito;
         }
 
     }
 
-    private void duplicar() {
+    protected void duplicar() {
         Object[] vert = new Object[n * 2];
         System.arraycopy(V, 0, vert, 0, n);
         V = vert;
@@ -174,9 +174,11 @@ public abstract class Grafo implements Grafeable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Grafo{");
-        sb.append("V=").append(Arrays.toString(V));
-        sb.append(", A=").append(Arrays.toString(A));
-        sb.append('}');
+        sb.append("V=").append(Arrays.toString(V)).append("\n");
+        sb.append("A=\n");
+        for (int i = 0; i < n; i++) {
+            sb.append(Arrays.toString(A[i]) + "\n");
+        }
         return sb.toString();
     }
 }
