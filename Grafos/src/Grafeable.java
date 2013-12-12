@@ -11,7 +11,6 @@ public interface Grafeable {
 
     void agregarVertice(Object x);
 
-    void agregarArista(int v, int w);
 
     void eliminarArista(int v, int w);
 

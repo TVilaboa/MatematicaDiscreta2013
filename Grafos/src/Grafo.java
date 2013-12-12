@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -8,133 +9,175 @@ import java.util.List;
  * Date: 16/08/13
  * Time: 13:20
  */
-public class Grafo implements Grafeable{
 
-    private Object[] V;
+public abstract class Grafo implements Grafeable {
 
-    private boolean[][] A;
+    protected final int infinito = 2147483647;
 
-    private int n;
+    protected Object[] V;
 
-    private int alfa;
+    protected int[][] A;
+
+    protected int n;
+
+    protected int alfa;
 
     Grafo() {
 
         V = new Object[10];
 
-        A = new boolean[10][10];
+        A = new int[10][10];
 
         n = 0;
 
         alfa = 0;
 
+
     }
 
-    Grafo(int capacidad) {
+    Grafo(int cant) {
 
-        V = new Object[capacidad];
+        V = new Object[cant];
 
-        A = new boolean[capacidad][capacidad];
+        A = new int[cant][cant];
 
         n = 0;
 
         alfa = 0;
 
+
     }
 
-    public void agregarVertice(Object x){
+    public Object[] getV() {
+        return V;
+    }
 
-/* Queda a cargo del lector tratar el caso en que haya que
+    public int[][] getA() {
+        return A;
+    }
 
-agrandar el arreglo y la matriz*/
+    public int getN() {
+        return n;
+    }
 
-        if(n==V.length)
+    public int getAlfa() {
+        return alfa;
+    }
+
+    public void setV(Object[] v) {
+        V = v;
+    }
+
+    public void setA(int[][] a) {
+        A = a;
+    }
+
+    public void setN(int n) {
+        this.n = n;
+    }
+
+    public void setAlfa(int alfa) {
+        this.alfa = alfa;
+    }
+
+    public void agregarVertice(Object x) {
+
+
+        if (n == V.length)
             duplicar();
 
 
         V[n] = x;
 
         n++;
+        for (int i = 0; i < n - 1; i++) {
+            A[n - 1][i] = infinito;
+            A[i][n - 1] = infinito;
+        }
 
     }
 
-    private void duplicar(){
-        Object[] vert=new Object[n*2];
-        System.arraycopy(V,0,vert,0,n);
-        V=vert;
-        boolean[][] aris=new boolean[n*2][n*2];
+    private void duplicar() {
+        Object[] vert = new Object[n * 2];
+        System.arraycopy(V, 0, vert, 0, n);
+        V = vert;
+        int[][] aris = new int[n * 2][n * 2];
         for (int i = 0; i < A.length; i++) {
             System.arraycopy(A[i], 0, aris[i], 0, A[0].length);
         }
-        A=aris;
+        A = aris;
     }
 
-    public void agregarArista(int v, int w){
 
-        A[v][w]=A[w][v] = true;
+    public void eliminarArista(int v, int w) {
 
-        alfa++;
-
-    }
-
-    public void eliminarArista(int v, int w){
-
-        A[v][w]=A[w][v] = false;
+        A[v][w] = A[w][v] = infinito;
 
         alfa--;
 
     }
 
-    public void eliminarVertice(int v){
+    public void eliminarVertice(int v) {
 
-      /* Queda a cargo */
-        Object[] vert=new Object[V.length];
-        System.arraycopy(V,0,vert,0,v);
-        System.arraycopy(V,v+1,vert,v,V.length-v);
-        V=vert;
+
+        Object[] vert = new Object[V.length];
+        System.arraycopy(V, 0, vert, 0, v);
+        System.arraycopy(V, v + 1, vert, v, V.length - v);
+        V = vert;
         //Ahora elimino las adayacencias
-        boolean[][] ady=new boolean[A.length][A.length];
+        int[][] ady = new int[A.length][A.length];
         for (int i = 0; i < v; i++) {
-            System.arraycopy(A,0,ady,0,v);
-            System.arraycopy(A[i], v+1, ady[i], v, A[0].length -v);
+            System.arraycopy(A, 0, ady, 0, v);
+            System.arraycopy(A[i], v + 1, ady[i], v, A[0].length - v);
         }
-        for (int i = v+1; i < A.length; i++) {
-            System.arraycopy(A,0,ady,0,v);
-            System.arraycopy(A[i], v+1, ady[i], v, A[0].length -v);
+        for (int i = v + 1; i < A.length; i++) {
+            System.arraycopy(A, 0, ady, 0, v);
+            System.arraycopy(A[i], v + 1, ady[i], v, A[0].length - v);
         }
 
 
     }
 
-    public boolean hayArista(int v, int w){
-        return A[v][w];
+    public boolean hayArista(int v, int w) {
+        return A[v][w] != infinito;
     }
 
-    public int orden(){
+    public int orden() {
         return n;
     }
 
-    public int cantAristas(){
+    public int cantAristas() {
         return alfa;
     }
 
-    public Object verVertice(int v){
+    public Object verVertice(int v) {
         return V[v];
     }
 
-    public List<Integer> getListaAdy(int v){
+    public List<Integer> getListaAdy(int v) {
 
 
+        List<Integer> list = new ArrayList<>();
 
-        List<Integer> list=new ArrayList<>();
+        for (int w = 0; w < n; w++)
 
-        for (int w = 0; w < n ; w++)
-
-            if (A[v][w])
-        list.add(w);
+            if (A[v][w] != infinito)
+                list.add(w);
         return list;
 
     }
 
+    public int arista(int v, int w) {
+        return A[v][w];
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Grafo{");
+        sb.append("V=").append(Arrays.toString(V));
+        sb.append(", A=").append(Arrays.toString(A));
+        sb.append('}');
+        return sb.toString();
+    }
 }
 
