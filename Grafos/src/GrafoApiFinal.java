@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -42,6 +43,7 @@ public class GrafoApiFinal {
         for (int i = 0; i < modif.length; i++) {
             System.out.println("<" + buscarCamino(modif, v, i) + ">");
         }
+
     }
 
     private String buscarCamino(int[] modif, int v, int i) {
@@ -51,7 +53,7 @@ public class GrafoApiFinal {
     }
 
     private int calcularMenor(int[] array, List<Integer> visitados) {
-        int resultado = 2147483640;
+        int resultado = 2000000000;
         for (int i = 0; i < array.length; i++) {
             if (array[i] < resultado && !visitados.contains(i)) {
                 resultado = i;
@@ -60,28 +62,47 @@ public class GrafoApiFinal {
         return resultado;
     }
 
-    public void DepthFirstSearch(GrafoNPD g, int s) {
-        boolean[] marked = new boolean[g.orden()];
-        Stack stack = new Stack();
-        dfs(g, s, marked, stack);
-        while (!stack.empty()) {
-            System.out.println(stack.pop());
-        }
+
+    int Compute_Indeg(int node, int n, GrafoNPD g) throws NullPointerException {
+        int v1, indeg_count = 0;
+        for (v1 = 0; v1 < n; v1++)
+            if (g.getA()[v1][node] == 1)  //checking for incoming edge
+                indeg_count++;
+        return indeg_count++;
     }
 
-    // depth first search from v
-    private void dfs(GrafoNPD g, int v, boolean[] marked, Stack stack) {
 
-        marked[v] = true;
-        stack.push(g.verVertice(v));
-        for (int w : g.getListaAdy(v)) {
-            if (!marked[w]) {
-                dfs(g, w, marked, stack);
+    int[] Topo_ordering(GrafoNPD g) {
+        Queue<Integer> queue = new ArrayBlockingQueue<Integer>(g.orden());
+        int[] indegree = new int[g.orden()];
+        int n = g.orden();
+        int j = 0;
+        for (int i = 0; i < n; i++) {
+            indegree[i] = Compute_Indeg(i, n, g);
+
+            if (indegree[i] == 0)
+                queue.add(i);
+        }
+        int b[] = new int[g.orden()];
+        while (!queue.isEmpty()) {
+            int k = queue.poll();
+            b[j++] = k;
+            for (int i = 0; i < n; i++) {
+                if (g.getA()[k][i] == 1) {
+                    g.getA()[k][i] = 0;
+                    indegree[i] = indegree[i] - 1;
+                    if (indegree[i] == 0)
+                        queue.add(i);
+
+                }
             }
         }
+
+        return b;
     }
 
-    public void cableado() {
+
+    public GrafoNDP cableado() {
 
         try (BufferedReader br = new BufferedReader(new FileReader("Aristas.dat"))) {
             String str1 = br.readLine();
@@ -89,21 +110,24 @@ public class GrafoApiFinal {
             for (int i = 0; i < Integer.parseInt(str1); i++) {
                 g.agregarVertice("Ciudad " + i);
             }
+            str1 = br.readLine();
             while (str1 != null) {
+                g.agregarArista(Integer.parseInt(str1.charAt(0) + ""), Integer.parseInt(str1.charAt(1) + ""), Integer.parseInt(str1.charAt(2) + ""));
                 str1 = br.readLine();
-                g.agregarArista(str1.charAt(0), str1.charAt(1), str1.charAt(2));
             }
-            aplicarPrim(g);
+            return aplicarPrim(g);
 
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+        return null;
 
     }
 
     public GrafoNDP aplicarPrim(GrafoNDP grafo) {
         GrafoNDP arbol = new GrafoNDP();
         arbol.setV(grafo.getV());
+        arbol.setN(grafo.getN());
         PriorityQueue<Arista> L = new PriorityQueue<>(grafo.orden(), new ComparatorAristas());
         for (int i = 0; i < grafo.orden(); i++) {
             for (int j = 0; j < grafo.orden(); j++) {
@@ -111,14 +135,14 @@ public class GrafoApiFinal {
                     L.add(new Arista(i, j, grafo.arista(i, j)));
             }
         }
-        List incluidos = new ArrayList(grafo.orden());
-        List noIncluidos = new ArrayList(grafo.orden());
+        List<Integer> incluidos = new ArrayList<Integer>(grafo.orden());
+        List<Integer> noIncluidos = new ArrayList<Integer>(grafo.orden());
         for (int i = 0; i < grafo.orden(); i++) {
             noIncluidos.add(i);
         }
         Arista min = L.poll();
         moverArista(arbol, incluidos, noIncluidos, min);
-        while (incluidos.size() != grafo.orden()) {
+        while (!noIncluidos.isEmpty()) {
             min = L.poll();
             if ((incluidos.contains(min.getV()) && noIncluidos.contains(min.getW()))
                     || (incluidos.contains(min.getW()) && noIncluidos.contains(min.getV()))) {
@@ -129,19 +153,19 @@ public class GrafoApiFinal {
         return arbol;
     }
 
-    private void moverArista(GrafoNDP arbol, List incluidos, List noIncluidos, Arista min) {
+    private void moverArista(GrafoNDP arbol, List<Integer> incluidos, List<Integer> noIncluidos, Arista min) {
         arbol.agregarArista(min.getV(), min.getW(), min.getPeso());
-        noIncluidos.remove(min.getV());
-        noIncluidos.remove(min.getW());
+        noIncluidos.remove((Integer) min.getV());
+        noIncluidos.remove((Integer) min.getW());
         incluidos.add(min.getV());
         incluidos.add(min.getW());
     }
 
 
-    public int[][] FloydWarshall(GrafoPD g) {
-        int[][] dist = new int[g.orden()][g.orden()];
+    public double[][] FloydWarshall(GrafoPD g) {
+        double[][] dist = new double[g.orden()][g.orden()];
         for (int i = 0; i < g.orden(); i++) {
-            for (int j = 0; i < g.orden(); i++) {
+            for (int j = 0; j < g.orden(); j++) {
                 if (i != j) {
                     dist[i][j] = g.arista(i, j);
                 }

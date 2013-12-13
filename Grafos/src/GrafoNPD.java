@@ -7,7 +7,7 @@
  */
 public class GrafoNPD extends Grafo {
 
-    public void agregarArista(int v, int w, boolean direccion) {       //D y NP
+    public void agregarArista(int v, int w, boolean direccion) { //true-> v a w,false -> w a v       //D y NP
         if (direccion) A[v][w] = 1;
         else A[w][v] = 1;
 
